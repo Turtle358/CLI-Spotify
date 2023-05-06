@@ -42,6 +42,7 @@ def song_search(song):
         device_id = devices['devices'][0]['id']
     # play the track on the selected device
     sp.start_playback(device_id=device_id, uris=[track_uri])
+
 def artist_playlist(Artist):
     artist_name = Artist.split('songs by ')[1]
     results = sp.search(q=f'artist:{artist_name}', type='artist', limit=1)
