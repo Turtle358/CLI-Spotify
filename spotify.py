@@ -58,10 +58,11 @@ def artist_playlist(Artist):
             if device['is_active']:
                 device_id = device['id']
                 break
+        print(f'Plating songs by {artist_name}')
         # if no active device is found, use the first available device
         if device_id is None and len(devices['devices']) > 0:
             device_id = devices['devices'][0]['id']
-        print(f'Plating songs by {artist}')
+
 
         # play the track on the selected device
         sp.start_playback(device_id=device_id, uris=track_uris)
