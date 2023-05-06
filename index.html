@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Voice Assistant Web Player</title>
+  </head>
+  <strong>Spotify Web Player - DO NOT CLOSE</strong>
+  <body>
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
+    <script>
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        const token = 'BQBaV_Znf4lipLMdQTcYM90WccXhicxQWyH6lI67PocL4XLwcgOJ-Z4RHo8yEalCEY5hygNjdGSthGN2p2p4w_pMZQJIRaeMwqnwwN35V630AV8GCI2-6EQxrB9C5R0ht-kkMjF1aVb0osXO8g45MKZjE0V9nTlI47ZDIIxJFSO6fqe2TJfCUJw-FCO_gGmW0GyZfQ7WIoMvs04XyA0Vsdq1vvaYO8PgKKdIY7gBx7pKDA75Y0vcug';
+        const player = new Spotify.Player({
+          name: 'Voice Assistant',
+          getOAuthToken: cb => { cb(token); }
+        });
+
+        // Error handling
+        player.addListener('initialization_error', ({ message }) => { console.error(message); });
+        player.addListener('authentication_error', ({ message }) => { console.error(message); });
+        player.addListener('account_error', ({ message }) => { console.error(message); });
+        player.addListener('playback_error', ({ message }) => { console.error(message); });
+
+        // Playback status updates
+        player.addListener('player_state_changed', state => { console.log(state); });
+
+        // Ready
+        player.addListener('ready', ({ device_id }) => {
+          console.log('Ready with Device ID', device_id);
+        });
+        // Connect to the player!
+        player.connect();
+      };
+    </script>
+  </body>
+</html>
