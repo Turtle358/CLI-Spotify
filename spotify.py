@@ -16,7 +16,9 @@ os.startfile('index.html')
 # Authenticating with spotify
 auth_manager = SpotifyOAuth(client_id=keys['client_id'], client_secret=keys['client_secret'],
                             redirect_uri='http://localhost:8000/auth/callback',
-                            scope='user-library-read,user-read-playback-state,user-modify-playback-state,streaming,user-read-currently-playing,playlist-read-private,playlist-read-collaborative,user-follow-read,user-top-read')
+                            scope='user-library-read,user-read-playback-state,user-modify-playback-state,\
+                            streaming,user-read-currently-playing,playlist-read-private,playlist-read-collaborative,\
+                            user-follow-read,user-top-read')
 sp = spotipy.Spotify(auth_manager=auth_manager)
 
 # Spotify Commands
@@ -58,10 +60,10 @@ def artist_playlist(Artist):
             if device['is_active']:
                 device_id = device['id']
                 break
-        print(f'Plating songs by {artist_name}')
         # if no active device is found, use the first available device
         if device_id is None and len(devices['devices']) > 0:
             device_id = devices['devices'][0]['id']
+        print(f'Plating songs by {artist_name.title()}')
 
 
         # play the track on the selected device
@@ -114,6 +116,23 @@ def SkipBack(option):
     elif option == 'shuffle':
         sp.shuffle(state=True)
         print("Shuffling")
+
+def WhatsPlaying(option):
+    result = sp.current_playback()
+    artist = result['item']['artists'][0]['name']
+    album_cover = result['item']['album']['images'][0]['url']
+    song_name = result['item']['name']
+    if option == 'who is this' or "who's this" or "whos this":
+        print(f'This is {song_name} by {artist.title()}')
+    else:
+        print(f'Currently playing {song_name} by {artist.title()}\n')
+    print(f'Album cover: {album_cover}\n')
+    # Shuffle State
+    if sp.current_playback()['shuffle_state'] == True:
+        print("Shuffle mode is on")
+    else:
+        print("Shuffle is off")
+
 def selections():
     # Ask user for a song (temp for text only)
     option = input("\n\nWelcome to Spotify\n------------------\nPlease enter a selection: ")\
@@ -136,9 +155,14 @@ def selections():
         PausePlay(option)
     elif option == 'skip' or option == 'back' or option == 'shuffle':
         SkipBack(option)
-    # Search for song
+    #Top tracks
     elif option.__contains__('top tracks') or option.__contains__('music'):
         TopTracks()
+    # Currently Playing
+    elif option.__contains__("what's playing") or option.__contains__('whats playing') or option.__contains__\
+                ('what song is this') or option.__contains__("what is this") or option.__contains__('who is this'):
+        WhatsPlaying(option)
+    # Search for song
     else:
         # More formatting...
         if option.__contains__(", "):
@@ -146,5 +170,6 @@ def selections():
         else:
             option = option.split(" by ")
         song_search(option)
+
 while True:
     selections()
