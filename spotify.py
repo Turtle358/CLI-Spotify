@@ -11,15 +11,14 @@ except FileNotFoundError:
     with open('spotify.keys',"wb") as file:
         pickle.dump(keys, file)
 
-
 # Starting web player in your default browser
 os.startfile('index.html')
-
 # Authenticating with spotify
 auth_manager = SpotifyOAuth(client_id=keys['client_id'], client_secret=keys['client_secret'],
                             redirect_uri='http://localhost:8000/auth/callback',
                             scope='user-library-read,user-read-playback-state,user-modify-playback-state,streaming,user-read-currently-playing,playlist-read-private,playlist-read-collaborative,user-follow-read,user-top-read')
 sp = spotipy.Spotify(auth_manager=auth_manager)
+
 # Spotify Commands
 def song_search(song):
     # search for a track
