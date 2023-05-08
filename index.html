@@ -7,28 +7,65 @@
   <body>
     <script src="https://sdk.scdn.co/spotify-player.js"></script>
     <script>
-      window.onSpotifyWebPlaybackSDKReady = () => {
-        const token = 'ACCESS_TOKEN';
-        const player = new Spotify.Player({
-          name: 'Voice Assistant',
-          getOAuthToken: cb => { cb(token); }
-        });
+      const clientId = "CLIENT_ID";
+      const redirectUri = "http://127.0.0.1:8000/index.html";
+      const scopes = ["user-read-playback-state", "streaming"];
 
+      function authorize() {
+        const url = `https://accounts.spotify.com/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+          redirectUri
+        )}&scope=${encodeURIComponent(scopes.join(" "))}&response_type=token`;
+        location.href = url;
+      }
+
+      function getAccessToken() {
+        const params = new URLSearchParams(window.location.hash.substring(1)); // Use hash instead of search
+        const accessToken = params.get("access_token");
+        return accessToken;
+      }
+
+      function initializePlayer(token) {
+        const player = new Spotify.Player({
+          name: "Voice Assistant",
+          getOAuthToken: (cb) => {
+            cb(token);
+          },
+        });
         // Error handling
-        player.addListener('initialization_error', ({ message }) => { console.error(message); });
-        player.addListener('authentication_error', ({ message }) => { console.error(message); });
-        player.addListener('account_error', ({ message }) => { console.error(message); });
-        player.addListener('playback_error', ({ message }) => { console.error(message); });
+        player.addListener("initialization_error", ({ message }) => {
+          console.error(message);
+        });
+        player.addListener("authentication_error", ({ message }) => {
+          console.error(message);
+        });
+        player.addListener("account_error", ({ message }) => {
+          console.error(message);
+        });
+        player.addListener("playback_error", ({ message }) => {
+          console.error(message);
+        });
 
         // Playback status updates
-        player.addListener('player_state_changed', state => { console.log(state); });
+        player.addListener("player_state_changed", (state) => {
+          console.log(state);
+        });
 
         // Ready
-        player.addListener('ready', ({ device_id }) => {
-          console.log('Ready with Device ID', device_id);
+        player.addListener("ready", ({ device_id }) => {
+          console.log("Ready with Device ID", device_id);
         });
+
         // Connect to the player!
         player.connect();
+      }
+
+      window.onSpotifyWebPlaybackSDKReady = () => {
+        const accessToken = getAccessToken();
+        if (accessToken) {
+          initializePlayer(accessToken);
+        } else {
+          authorize();
+        }
       };
     </script>
   </body>
