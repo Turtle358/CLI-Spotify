@@ -1,4 +1,4 @@
-import spotipy,os,pickle,time;from spotipy.oauth2 import SpotifyOAuth
+import spotipy,os,pickle,time,webbrowser;from spotipy.oauth2 import SpotifyOAuth
 # Get keys
 try:
     with open("spotify.keys","rb") as file:
@@ -12,7 +12,8 @@ except FileNotFoundError:
         pickle.dump(keys, file)
 
 # Starting web player in your default browser
-os.startfile('index.html')
+os.startfile('Webpage.bat')
+webbrowser.open('http://127.0.0.1:8000/index.html')
 # Authenticating with spotify
 auth_manager = SpotifyOAuth(client_id=keys['client_id'], client_secret=keys['client_secret'],
                             redirect_uri='http://localhost:8000/auth/callback',
@@ -42,7 +43,7 @@ def song_search(song):
     # play the track on the selected device
     sp.start_playback(device_id=device_id, uris=[track_uri])
     #say what is playing
-    time.sleep(0.35)
+    time.sleep(0.4)
     songinfo = sp.current_playback()
     print(f"Playing {songinfo['item']['name']} by {songinfo['item']['artists'][0]['name']}")
 
