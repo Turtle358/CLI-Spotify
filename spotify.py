@@ -1,4 +1,4 @@
-import spotipy,os,pickle;from spotipy.oauth2 import SpotifyOAuth
+import spotipy,os,pickle,time;from spotipy.oauth2 import SpotifyOAuth
 # Get keys
 try:
     with open("spotify.keys","rb") as file:
@@ -26,10 +26,8 @@ def song_search(song):
     # search for a track
     try:
         results = sp.search(q=f'track:{song[0]} artist:{song[1]}', type='track')
-        print(f"Playing {song[0].title()} by {song[1].title()}")
     except IndexError:
         results = sp.search(q=f'track:{song[0]}', type='track')
-        print(f"Playing {song[0].title()}")
     track_uri = results['tracks']['items'][0]['uri']
     # get the ID of the device running the script
     devices = sp.devices()
@@ -43,6 +41,10 @@ def song_search(song):
         device_id = devices['devices'][0]['id']
     # play the track on the selected device
     sp.start_playback(device_id=device_id, uris=[track_uri])
+    #say what is playing
+    time.sleep(0.35)
+    songinfo = sp.current_playback()
+    print(f"Playing {songinfo['item']['name']} by {songinfo['item']['artists'][0]['name']}")
 
 def artist_playlist(Artist):
     artist_name = Artist.split('songs by ')[1]
@@ -50,6 +52,7 @@ def artist_playlist(Artist):
     artist = results['artists']['items'][0]
     artist_id = artist['id']
     top_tracks = sp.artist_top_tracks(artist_id)
+    print(f'Playing songs by {artist_name.title()}')
     track_uris = []
     for track in top_tracks['tracks']:
         track_uris.append(track['uri'])
@@ -63,8 +66,6 @@ def artist_playlist(Artist):
         # if no active device is found, use the first available device
         if device_id is None and len(devices['devices']) > 0:
             device_id = devices['devices'][0]['id']
-        print(f'Plating songs by {artist_name.title()}')
-
 
         # play the track on the selected device
         sp.start_playback(device_id=device_id, uris=track_uris)
@@ -86,10 +87,12 @@ def userplaylist():
     # play the track on the selected device
     sp.start_playback(device_id=device_id, uris=track_uris)
 def TopTracks():
-    results = sp.current_user_top_tracks()
-    print(results)
-    track_uris = [item['track']['uri'] for item in results['items']]
+    results = sp.current_user_top_tracks(limit=20)
+    top_tracks = results['items']
+    track_uris = [track['uri'] for track in top_tracks]
     print("Playing your Liked Songs")
+    #Enabling shuffle (if not already on)
+    sp.shuffle(state=True)
     # get the ID of the device running the script
     devices = sp.devices()
     device_id = None
@@ -104,7 +107,7 @@ def TopTracks():
     # play the track on the selected device
     sp.start_playback(device_id=device_id, uris=track_uris)
 def PausePlay(option):
-    if option == 'pause':
+    if option == 'pause' or option == 'stop':
         sp.pause_playback()
     elif option == 'continue':
         sp.start_playback()
@@ -136,7 +139,7 @@ def WhatsPlaying(option):
 def selections():
     # Ask user for a song (temp for text only)
     option = input("\n\nWelcome to Spotify\n------------------\nPlease enter a selection: ")\
-        .lower().split('on spotify')[0]
+        .lower().split('on spotify')[0].split("?")[0]
     # Changing formatting
     if option.__contains__('play '):
         option = option.split('play ')[1]
@@ -151,7 +154,7 @@ def selections():
             or option.__contains__("my liked songs"):
         userplaylist()
     # Play/ Pause
-    elif option.__contains__('pause') or option.__contains__('continue'):
+    elif option.__contains__('pause') or option.__contains__('continue') or option.__contains__('stop'):
         PausePlay(option)
     elif option == 'skip' or option == 'back' or option == 'shuffle':
         SkipBack(option)
@@ -160,8 +163,20 @@ def selections():
         TopTracks()
     # Currently Playing
     elif option.__contains__("what's playing") or option.__contains__('whats playing') or option.__contains__\
-                ('what song is this') or option.__contains__("what is this") or option.__contains__('who is this'):
+                ('what song is this') or option.__contains__("what is this") or option.__contains__('who is this')\
+            or option.__contains__("who's this"):
         WhatsPlaying(option)
+    elif option == 'commands':
+        print('''Commands:\n
+        (play) [song name]: play a specific song\n
+        (play) music: plays your top tracks\n
+        (play) top tracks: plays your top tracks\n
+        (play) my songs/ my playlist: plays your liked songs\n
+        (play) songs by [artist]: plays songs by a specific artist\n
+        skip: skips the song\n
+        shuffle: enables shuffle\n
+        what's playing: tells you whats playing and info about song\n
+        who's this: same as what's playing but phrased differently''')
     # Search for song
     else:
         # More formatting...
