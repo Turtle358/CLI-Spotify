@@ -1,4 +1,4 @@
-import spotipy,os,pickle,time,webbrowser;from spotipy.oauth2 import SpotifyOAuth
+import spotipy,pickle,time,webbrowser,subprocess;from spotipy.oauth2 import SpotifyOAuth
 # Get keys
 try:
     with open("spotify.keys","rb") as file:
@@ -12,7 +12,7 @@ except FileNotFoundError:
         pickle.dump(keys, file)
 
 # Starting web player in your default browser
-os.startfile('Webpage.bat')
+subprocess.list2cmdline('python -m http.server 8000')
 webbrowser.open('http://127.0.0.1:8000/index.html')
 # Authenticating with spotify
 auth_manager = SpotifyOAuth(client_id=keys['client_id'], client_secret=keys['client_secret'],
