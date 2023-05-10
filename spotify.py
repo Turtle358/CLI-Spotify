@@ -1,4 +1,4 @@
-import spotipy,pickle,time,webbrowser,subprocess;from spotipy.oauth2 import SpotifyOAuth
+import spotipy,pickle,time,webbrowser,subprocess,random,os;from spotipy.oauth2 import SpotifyOAuth
 # Get keys
 try:
     with open("spotify.keys","rb") as file:
@@ -12,7 +12,8 @@ except FileNotFoundError:
         pickle.dump(keys, file)
 
 # Starting web player in your default browser
-subprocess.list2cmdline('python -m http.server 8000')
+
+subprocess.Popen("python -m http.server 8000")
 webbrowser.open('http://127.0.0.1:8000/index.html')
 # Authenticating with spotify
 auth_manager = SpotifyOAuth(client_id=keys['client_id'], client_secret=keys['client_secret'],
@@ -91,7 +92,7 @@ def TopTracks():
     results = sp.current_user_top_tracks(limit=20)
     top_tracks = results['items']
     track_uris = [track['uri'] for track in top_tracks]
-    print("Playing your Liked Songs")
+    print("Playing your top Songs")
     #Enabling shuffle (if not already on)
     sp.shuffle(state=True)
     # get the ID of the device running the script
@@ -107,6 +108,19 @@ def TopTracks():
 
     # play the track on the selected device
     sp.start_playback(device_id=device_id, uris=track_uris)
+def on_repeat():
+    mix_uri = None
+    mixes = sp.current_user_playlists(limit=50, offset=0)
+    for playlist in mixes['items']:
+        if playlist['name'] == "On Repeat":
+            mix_uri = playlist['uri']
+            break
+    if mix_uri:
+        # play the mix using the Spotify SDK
+        sp.start_playback(context_uri=mix_uri)
+        print("Playing your most played songs")
+    else:
+        print("Mix playlist not found.")
 def PausePlay(option):
     if option == 'pause' or option == 'stop':
         sp.pause_playback()
@@ -136,7 +150,6 @@ def WhatsPlaying(option):
         print("Shuffle mode is on")
     else:
         print("Shuffle is off")
-
 def selections():
     # Ask user for a song (temp for text only)
     option = input("\n\nWelcome to Spotify\n------------------\nPlease enter a selection: ")\
@@ -161,7 +174,11 @@ def selections():
         SkipBack(option)
     #Top tracks
     elif option.__contains__('top tracks') or option.__contains__('music'):
-        TopTracks()
+        tmp = random.randrange(2)
+        if tmp == 0:
+            TopTracks()
+        else:
+            on_repeat()
     # Currently Playing
     elif option.__contains__("what's playing") or option.__contains__('whats playing') or option.__contains__\
                 ('what song is this') or option.__contains__("what is this") or option.__contains__('who is this')\
