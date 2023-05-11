@@ -1,4 +1,4 @@
-import spotipy,pickle,time,webbrowser,subprocess,random,os;from spotipy.oauth2 import SpotifyOAuth
+import spotipy,pickle,time,webbrowser,subprocess,random;from spotipy.oauth2 import SpotifyOAuth
 # Get keys
 try:
     with open("spotify.keys","rb") as file:
@@ -26,6 +26,8 @@ sp = spotipy.Spotify(auth_manager=auth_manager)
 # Spotify Commands
 def song_search(song):
     # search for a track
+    if song.__contains__("polish cow") or song.__contains__("polish cow song") or song.__contains__("polska cow"):
+        song = ['Gdzie jest biały węgorz']
     try:
         results = sp.search(q=f'track:{song[0]} artist:{song[1]}', type='track')
     except IndexError:
@@ -44,9 +46,12 @@ def song_search(song):
     # play the track on the selected device
     sp.start_playback(device_id=device_id, uris=[track_uri])
     #say what is playing
-    time.sleep(0.4)
-    songinfo = sp.current_playback()
-    print(f"Playing {songinfo['item']['name']} by {songinfo['item']['artists'][0]['name']}")
+    try:
+        time.sleep(0.4)
+        songinfo = sp.current_playback()
+        print(f"Playing {songinfo['item']['name']} by {songinfo['item']['artists'][0]['name']}")
+    except:
+        print(f"Playing {song[0]}")
 
 def artist_playlist(Artist):
     artist_name = Artist.split('songs by ')[1]
