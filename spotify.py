@@ -1,4 +1,8 @@
 import spotipy,pickle,time,webbrowser,subprocess,random;from spotipy.oauth2 import SpotifyOAuth
+# Starting web player in your default browser
+subprocess.Popen("python -m http.server 8000")
+webbrowser.open('http://127.0.0.1:8000/index.html')
+
 # Get keys
 try:
     with open("spotify.keys","rb") as file:
@@ -11,10 +15,6 @@ except FileNotFoundError:
     with open('spotify.keys',"wb") as file:
         pickle.dump(keys, file)
 
-# Starting web player in your default browser
-
-subprocess.Popen("python -m http.server 8000")
-webbrowser.open('http://127.0.0.1:8000/index.html')
 # Authenticating with spotify
 auth_manager = SpotifyOAuth(client_id=keys['client_id'], client_secret=keys['client_secret'],
                             redirect_uri='http://localhost:8000/auth/callback',
@@ -141,31 +141,32 @@ def SkipBack(option):
         print("Shuffling")
 
 def WhatsPlaying(option):
-    result = sp.current_playback()
-    artist = result['item']['artists'][0]['name']
-    album_cover = result['item']['album']['images'][0]['url']
-    song_name = result['item']['name']
-    if option == 'who is this' or "who's this" or "whos this":
-        print(f'This is {song_name} by {artist.title()}')
-    else:
-        print(f'Currently playing {song_name} by {artist.title()}\n')
-    print(f'Album cover: {album_cover}\n')
-    # Shuffle State
-    if sp.current_playback()['shuffle_state'] == True:
-        print("Shuffle mode is on")
-    else:
-        print("Shuffle is off")
-def selections():
+    try:
+        result = sp.current_playback()
+        artist = result['item']['artists'][0]['name']
+        album_cover = result['item']['album']['images'][0]['url']
+        song_name = result['item']['name']
+        if option == 'who is this' or "who's this" or "whos this":
+            print(f'This is {song_name} by {artist.title()}')
+        else:
+            print(f'Currently playing {song_name} by {artist.title()}\n')
+        print(f'Album cover: {album_cover}\n')
+        # Shuffle State
+        if sp.current_playback()['shuffle_state'] == True:
+            print("Shuffle mode is on")
+        else:
+            print("Shuffle is off")
+    except:
+        print("Nothing is currently playing")
+def selections(option):
     # Ask user for a song (temp for text only)
-    option = input("\n\nWelcome to Spotify\n------------------\nPlease enter a selection: ")\
-        .lower().split('on spotify')[0].split("?")[0]
+    option = option.lower().split('on spotify')[0].split("?")[0]
     # Changing formatting
     if option.__contains__('play '):
         option = option.split('play ')[1]
     # User didn't give a option
     if option == 'play':
         print('What would you like to play?')
-        selections()
     elif option.__contains__("songs by "):
         artist_playlist(option)
     # Play the users liked playlist
@@ -208,6 +209,9 @@ def selections():
         else:
             option = option.split(" by ")
         song_search(option)
+# To run on startup to allow for web page to open correctly
+selections("what's playing")
 
+# Ask the user what to do
 while True:
-    selections()
+    selections(input("\n\nWelcome to Spotify\n------------------\nPlease enter a selection: "))
